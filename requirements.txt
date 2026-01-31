@@ -1,0 +1,321 @@
+FocusGuard - Smart Productivity & App Blocking System
+Comprehensive Development Specifications for AI Developer
+
+1. EXECUTIVE SUMMARY
+Project Name: FocusGuard - Smart Productivity App with Intelligent App Blocking Platform: Android (Native or React Native/Flutter) Core Purpose: A productivity application that uses time-based app blocking, task completion incentives, and curated content access to eliminate distractions and boost focus. 
+
+2. CORE FEATURES SPECIFICATION
+2.1 Midnight Lockdown System
+Functionality: 
+Automatically blocks all apps except Phone and Email at midnight (12:00 AM)
+Users must complete their to-do list to unlock all apps
+Provides emergency override with consequences (XP penalty, streak break)
+ Technical Requirements: 
+Use Android AccessibilityService or Device Administrator API for app blocking
+Implement background service that monitors time and task completion status
+Whitelist: com.android.phone (Phone), com.google.android.gm (Gmail), com.samsung.android.email (Samsung Email)
+Block mechanism: Overlay blocker screen or use AppOpsManager to restrict app launches
+Store block schedule in local SQLite database with encrypted preferences
+2.2 Task-Based App Unlocking System
+Functionality: 
+Users create daily to-do lists with time allocations
+During scheduled task time, only specified apps are allowed (e.g., "Study Math" allows Calculator, Notion, YouTube edu playlist)
+All other apps remain blocked until task is marked complete or time expires
+Users earn XP points for completing tasks on time
+ Technical Requirements: 
+Task Model: task_id, title, description, start_time, end_time, allowed_apps[], xp_reward, status (pending/active/completed/failed)
+Foreground service monitors current active task and blocks unauthorized app launches
+Use UsageStatsManager to detect app switching attempts
+Implement task timer with notifications (5 min before end, task complete reminder)
+Sync tasks with Google Calendar API (optional)
+2.3 Curated YouTube Learning Mode
+Functionality: 
+Users sync YouTube playlists or paste video URLs
+In-app embedded YouTube player displays only curated videos
+All other apps (including native YouTube) remain blocked during learning session
+Prevents algorithm-driven recommendations and infinite scroll
+Tracks watch time and completion percentage
+ Technical Requirements: 
+Integrate YouTube Data API v3 for playlist fetching
+Use YouTube Android Player API or WebView with embedded iframe player
+Disable autoplay, related videos, and comments in embedded player
+Video Model: video_id, title, thumbnail_url, duration, watch_progress, playlist_id, date_added
+Block com.google.android.youtube package while in learning mode
+Allow users to manually add URLs with regex validation (youtube.com/watch?v=...)
+
+3. UI/UX DESIGN SPECIFICATIONS
+3.1 Design System
+Color Palette: 
+Primary: #06f9d0 (Bright Cyan/Turquoise)
+Secondary: #a855f7 (Purple)
+Accent: #ff6b6b (Coral Red)
+Background Light: #f5f8f8
+Background Dark: #0f231f
+Success: #10b981 (Green)
+Warning: #f59e0b (Orange)
+Error: #ef4444 (Red)
+ Typography: 
+Primary Font: Spline Sans (Headings), Inter/Roboto (Body)
+Heading Sizes: H1-32sp, H2-24sp, H3-20sp, Body-16sp, Caption-14sp
+Font Weights: Light(300), Regular(400), Medium(500), Semibold(600), Bold(700)
+ Spacing & Layout: 
+Base spacing unit: 8dp (use multiples: 8dp, 16dp, 24dp, 32dp)
+Card padding: 16dp horizontal, 20dp vertical
+Border radius: Small-8dp, Medium-12dp, Large-16dp, Full-999dp
+Card elevation: 2dp default, 4dp hover/active states
+3.2 Screen-by-Screen Specifications
+Screen 1: Home Dashboard
+Components: 
+Top App Bar: User avatar (circular), username, level badge, XP counter, notification bell, settings icon
+Progress Card: Circular progress ring showing completed/total tasks (6/8), animated mascot character, daily XP earned message ("You're on fire! 🔥 +250 XP earned today")
+Focus Zone Section: Quick access cards for Study Beats (YouTube integration) and Pomodoro Timer
+Daily Tasks List: Scrollable task cards with checkboxes, task name, category tag, time due, XP reward badge
+Screen Time Widget: Dark card showing total screen time (3h 15m), percentage change vs yesterday (-12%)
+Bottom Navigation: Home, Stats, Focus, Social tabs with icon + label
+ Interactions: 
+Tap task checkbox → Mark complete with checkmark animation + XP popup
+Tap Focus Zone card → Navigate to respective feature
+Pull to refresh → Sync tasks and update stats
+Swipe task left → Quick delete with undo snackbar
+Screen 2: Create/Edit Task
+Components: 
+Full-screen modal with close button (X) top-left
+Input Fields: Task Title (text), Description (multiline), Start Time (time picker), End Time (time picker), Category (dropdown: Work/Study/Exercise/Mindfulness/Other)
+Allowed Apps Selector: Multi-select list with app icons + names, search bar, "Select All" toggle
+XP Reward Calculator: Automatically calculates XP based on task duration (1 XP per 10 minutes)
+Repeat Options: One-time, Daily, Weekdays, Custom days
+Primary Button: "Create Task" or "Save Changes" (full-width, primary color)
+ Validation: 
+End time must be after start time
+Task title required (max 100 chars)
+At least one allowed app must be selected (except for Phone/Email which are always allowed)
+Show error messages below relevant field with red color
+Screen 3: YouTube Learning Mode
+Components: 
+Top Bar: "Learning Mode" title, exit button, playlist name
+Video Player: Embedded YouTube player (16:9 aspect ratio), minimal controls (play/pause, seek bar, fullscreen)
+Current Video Info: Title, description (collapsible), progress bar, watch time counter
+Up Next Queue: Horizontal scrollable list of upcoming videos with thumbnails
+Block Status Indicator: Banner showing "All apps blocked except learning content" with timer
+Add Video Button: Floating action button (FAB) to paste new URLs
+ Interactions: 
+Tap video in queue → Load and play video
+Tap FAB → Show dialog to paste YouTube URL or import playlist
+Exit button → Show confirmation dialog "End learning session?"
+Video completion → Auto-play next video OR show "Session Complete" with XP earned
+Screen 4: Settings & Configuration
+Sections: 
+Midnight Lockdown: Toggle enable/disable, time selector (default 12:00 AM), whitelist apps customization
+Blocking Behavior: Strict mode (no overrides), Flexible mode (allow emergency override with penalties)
+Notifications: Daily reminder, task start alerts, achievement unlocks
+Data & Privacy: Export data, clear history, delete account
+Permissions: Usage access, accessibility service, battery optimization exemption
+About: App version, privacy policy, terms of service, contact support
+Screen 5: App Block Overlay
+Components: 
+Full-screen overlay (semi-transparent background with blur effect)
+Center Content Card: Lock icon, "App Blocked" heading, reason message ("Complete your to-do list to unlock" or "Available after 8:00 PM")
+Countdown Timer: Shows remaining time until app becomes available
+Emergency Override Button: Small text link "Emergency access" (shows warning dialog)
+Motivational Quote: Rotates daily productivity quotes
+Return to Focus Button: Takes user back to home dashboard
+ Behavior: 
+Cannot be dismissed by back button or home button
+Emergency override requires confirmation + enters penalty (lose 50 XP, break streak)
+Automatically dismisses when time expires or task completed
+
+4. BACKEND & DATA ARCHITECTURE
+4.1 Database Schema (SQLite)
+Table 1: users 
+ - user_id (INTEGER PRIMARY KEY AUTOINCREMENT) - username (TEXT NOT NULL) - email (TEXT UNIQUE) - profile_picture_url (TEXT) - level (INTEGER DEFAULT 1) - total_xp (INTEGER DEFAULT 0) - current_streak (INTEGER DEFAULT 0) - longest_streak (INTEGER DEFAULT 0) - created_at (TIMESTAMP) - last_login (TIMESTAMP) 
+Table 2: tasks 
+ - task_id (INTEGER PRIMARY KEY AUTOINCREMENT) - user_id (INTEGER FOREIGN KEY) - title (TEXT NOT NULL) - description (TEXT) - start_time (TIMESTAMP NOT NULL) - end_time (TIMESTAMP NOT NULL) - category (TEXT) - allowed_apps (TEXT) -- JSON array of package names - xp_reward (INTEGER) - status (TEXT) -- 'pending', 'active', 'completed', 'failed', 'skipped' - repeat_pattern (TEXT) -- 'once', 'daily', 'weekdays', JSON for custom - created_at (TIMESTAMP) - completed_at (TIMESTAMP) 
+Table 3: youtube_videos 
+ - video_id (TEXT PRIMARY KEY) - user_id (INTEGER FOREIGN KEY) - playlist_id (TEXT) - title (TEXT) - thumbnail_url (TEXT) - duration (INTEGER) -- seconds - watch_progress (INTEGER) -- seconds watched - is_completed (BOOLEAN) - date_added (TIMESTAMP) 
+Table 4: app_usage_logs 
+ - log_id (INTEGER PRIMARY KEY AUTOINCREMENT) - user_id (INTEGER FOREIGN KEY) - package_name (TEXT) - app_name (TEXT) - usage_date (DATE) - total_time_minutes (INTEGER) - open_count (INTEGER) 
+Table 5: achievements 
+ - achievement_id (INTEGER PRIMARY KEY AUTOINCREMENT) - user_id (INTEGER FOREIGN KEY) - achievement_type (TEXT) -- 'first_task', 'week_streak', 'productivity_champ', etc. - title (TEXT) - description (TEXT) - icon_url (TEXT) - earned_at (TIMESTAMP) 
+Table 6: app_block_schedule 
+ - schedule_id (INTEGER PRIMARY KEY AUTOINCREMENT) - user_id (INTEGER FOREIGN KEY) - rule_name (TEXT) -- 'Midnight Lockdown', 'Study Session', etc. - start_time (TIME) - end_time (TIME) - days_of_week (TEXT) -- JSON array ['MON', 'TUE', ...] - blocked_apps (TEXT) -- JSON array or '*' for all except whitelist - whitelist_apps (TEXT) -- JSON array of allowed apps - is_active (BOOLEAN) 
+4.2 Background Services & Workers
+Service 1: TaskMonitorService (Foreground Service) 
+Purpose: Monitors current time and active tasks, enforces app blocking rules
+Runs: Always (with foreground notification showing current task or "No active tasks")
+Actions: Every 5 seconds, check if current time matches any task schedule; if blocked app is launched, immediately show blocker overlay; update task status (active/completed/failed); send notifications for task start/end
+ Service 2: MidnightLockdownScheduler (WorkManager) 
+Purpose: Schedules daily midnight app lockdown
+Runs: Once per day at 12:00 AM
+Actions: Enable global app block mode; send notification "Midnight lockdown active - complete tasks to unlock"; persist state to SharedPreferences
+ Service 3: UsageStatsCollector (WorkManager - Periodic) 
+Purpose: Collects daily app usage statistics
+Runs: Every 1 hour
+Actions: Query UsageStatsManager for app usage data; store in app_usage_logs table; update screen time widget
+ Broadcast Receivers: 
+BOOT_COMPLETED: Restart TaskMonitorService after device reboot
+PACKAGE_ADDED/REMOVED: Update installed apps list for blocker selection
+SCREEN_ON/OFF: Pause/resume usage tracking
+4.3 Android Permissions & APIs Required
+Critical Permissions: 
+android.permission.PACKAGE_USAGE_STATS (Usage Access)
+android.permission.BIND_ACCESSIBILITY_SERVICE (Accessibility Service)
+android.permission.FOREGROUND_SERVICE
+android.permission.POST_NOTIFICATIONS (Android 13+)
+android.permission.INTERNET (YouTube API)
+android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+android.permission.SYSTEM_ALERT_WINDOW (Draw overlay)
+ Key APIs: 
+AccessibilityService: Detect app launches and intercept with blocker overlay
+UsageStatsManager: Retrieve app usage data for statistics
+WindowManager: Display blocker overlay on top of blocked apps
+WorkManager: Schedule background tasks (lockdown, usage collection)
+NotificationManager: Send task reminders and achievement notifications
+YouTube Data API v3: Fetch playlists and video metadata
+YouTube Android Player API: Embed and control video playback
+4.4 Backend Server (Optional for Cloud Features)
+Technology Stack Recommendations: 
+Backend: Node.js + Express OR Python + FastAPI
+Database: PostgreSQL (production) or Firebase Firestore (easier setup)
+Authentication: Firebase Auth or JWT tokens
+Hosting: Render, Railway, or Google Cloud Platform
+ API Endpoints (if backend is implemented): 
+POST /api/auth/register - User registration
+POST /api/auth/login - User login
+GET /api/tasks/{user_id} - Fetch user tasks
+POST /api/tasks - Create new task
+PUT /api/tasks/{task_id} - Update task
+DELETE /api/tasks/{task_id} - Delete task
+GET /api/stats/{user_id} - Get user statistics and XP
+POST /api/youtube/playlists - Sync YouTube playlists
+GET /api/leaderboard - Global XP leaderboard (if social features added)
+ Note: Backend is OPTIONAL for MVP. The app can function entirely offline with local SQLite database. Cloud sync can be added later for multi-device support.
+
+5. DEVELOPMENT APPROACH & MILESTONES
+5.1 Technology Stack Recommendation
+Option A: Native Android (Kotlin) 
+Pros: Best performance, full access to Android APIs, superior app blocking control
+Cons: Android-only, longer development time
+Use: Jetpack Compose for UI, Kotlin Coroutines, Room Database, WorkManager
+ Option B: React Native 
+Pros: Cross-platform (Android/iOS future), faster development, reusable web dashboard code
+Cons: Limited access to Android system APIs (need native modules for app blocking)
+Use: Expo or bare React Native, React Navigation, AsyncStorage, react-native-app-usage
+ Recommendation: Native Android (Kotlin) for MVP due to critical app blocking requirements. Port to React Native later if cross-platform is needed.
+5.2 MVP Development Phases (8-10 Weeks)
+Week 1-2: Foundation & Setup 
+Set up Android project with required permissions
+Implement AccessibilityService for app detection
+Create SQLite database with Room ORM
+Build basic authentication and user profile setup
+ Week 3-4: Core Blocking Features 
+Develop TaskMonitorService with app blocking logic
+Create app blocker overlay UI
+Implement midnight lockdown scheduler
+Build whitelist/blacklist app selector
+ Week 5-6: Task Management System 
+Create task creation/editing screens
+Implement task-based app unlocking logic
+Build XP reward system and level progression
+Add task notifications and reminders
+ Week 7-8: YouTube Learning Mode 
+Integrate YouTube Data API v3
+Build embedded video player with curated playlist
+Implement URL paste and playlist sync functionality
+Add watch progress tracking
+ Week 9-10: Polish & Testing 
+Implement usage statistics dashboard
+Add achievements and badges system
+Comprehensive testing (unit, integration, UI)
+Bug fixes and performance optimization
+Prepare for Google Play Store submission
+5.3 Testing Requirements
+Testing Checklist: 
+Unit Tests: Database operations, XP calculations, time validation logic
+Integration Tests: Task creation → app blocking → completion flow
+UI Tests: Navigation flows, button clicks, form validation
+Accessibility Tests: Test with TalkBack enabled
+Battery Tests: Ensure background service doesn't drain battery excessively
+Edge Cases: Midnight lockdown during active task, emergency override abuse, YouTube API rate limits
+Device Compatibility: Test on Android 10, 11, 12, 13, 14 with different screen sizes
+
+6. SECURITY & PRIVACY CONSIDERATIONS
+Data Privacy: 
+All user data stored locally by default (no cloud unless opted in)
+Encrypt sensitive data (passwords if local auth, API tokens) using Android Keystore
+No personally identifiable information collected without explicit consent
+Comply with GDPR/CCPA for data export and deletion
+ Permissions Transparency: 
+Clearly explain why each permission is needed in onboarding
+Provide in-app guides for granting usage access and accessibility permissions
+Never request permissions not essential to core functionality
+ YouTube API Compliance: 
+Follow YouTube API Terms of Service (no downloading videos, respect rate limits)
+Display YouTube branding as required by API guidelines
+Implement exponential backoff for API requests
+ App Blocking Security: 
+Prevent app uninstallation during active blocking period (optional, warn user)
+Emergency override should have cooldown period (e.g., 1 override per day max)
+Log all override attempts for user transparency
+
+7. FUTURE ENHANCEMENTS (POST-MVP)
+
+Social Features: Friend challenges, shared goals, XP leaderboards
+Advanced Analytics: Weekly/monthly productivity reports, app usage heatmaps
+Smart Suggestions: AI-recommended task schedules based on past behavior
+Pomodoro Timer Integration: Built-in focus sessions with break reminders
+Spotify/Apple Music Integration: Curated focus playlists
+Location-Based Blocking: Auto-enable study mode when at library/school
+Parental Controls: Parent app to monitor child's productivity
+Widget Support: Home screen widget showing current task and timer
+Wearable Support: Smartwatch notifications and quick task completion
+Export Reports: PDF/CSV export of productivity data
+
+8. SUCCESS METRICS & KPIs
+
+User Retention: 40% weekly active users after 1 month
+Task Completion Rate: Average 70% of daily tasks completed
+Screen Time Reduction: Users reduce daily screen time by 20% within 2 weeks
+Engagement: Average 3+ tasks created per day per user
+YouTube Learning: Average 30+ minutes of curated video watch time per session
+Crash Rate: <1% crash-free sessions
+Rating: Maintain 4.5+ star rating on Google Play Store
+
+9. APPENDIX
+9.1 Example User Flow (End-to-End)
+
+1. User opens app for the first time → Onboarding screens explaining features 2. User grants required permissions (Usage Access, Accessibility, Battery optimization exemption) 3. User creates first task: "Study Math - 2:00 PM to 4:00 PM" with Calculator and Notion allowed 4. At 1:55 PM, user receives notification: "Math Study starting in 5 minutes" 5. At 2:00 PM, TaskMonitorService activates → All apps blocked except Calculator, Notion, Phone, Email 6. User tries to open Instagram → Blocker overlay appears with message and countdown timer 7. User completes task at 3:45 PM → Marks task complete → Earns 140 XP + "Early Bird" badge popup 8. Apps automatically unlock → User browses social media freely 9. At 11:59 PM, notification: "Midnight lockdown in 1 minute" 10. At 12:00 AM, all apps blocked except Phone and Email 11. User opens app, completes 3 tasks from yesterday's to-do list 12. Apps unlock → User continues day normally 
+9.2 Glossary
+XP (Experience Points): Points earned for completing tasks, used for leveling up Streak: Consecutive days of completing at least one task Whitelist: Apps allowed during blocking periods Blacklist: Apps blocked during focus sessions Curated Content: User-selected YouTube videos/playlists for distraction-free learning Emergency Override: Manual unlock of blocked apps with XP penalty 
+9.3 References & Resources
+
+Android AccessibilityService Documentation: https://developer.android.com/reference/android/accessibilityservice/AccessibilityService
+UsageStatsManager Guide: https://developer.android.com/reference/android/app/usage/UsageStatsManager
+YouTube Data API v3: https://developers.google.com/youtube/v3
+YouTube Android Player API: https://developers.google.com/youtube/android/player
+Jetpack Compose: https://developer.android.com/jetpack/compose
+WorkManager: https://developer.android.com/topic/libraries/architecture/workmanager
+Material Design 3: https://m3.material.io/
+
+10. FINAL NOTES FOR AI DEVELOPER
+Key Priorities: 
+App blocking MUST be reliable - this is the core value proposition
+Battery efficiency is critical - background service should use <5% battery per day
+User experience should feel rewarding, not punishing
+Accessibility permissions explanation must be crystal clear to avoid user confusion
+ Common Pitfalls to Avoid: 
+Don't over-engineer MVP - start with local-only, add cloud later
+Ensure blocker can't be easily bypassed (test thoroughly)
+Don't request unnecessary permissions - users are sensitive to privacy
+YouTube API has rate limits - implement caching and error handling
+ Deliverables Expected: 
+Source code repository (Git) with clear documentation
+APK build for testing + Google Play Store submission
+Technical documentation explaining architecture and setup
+User guide for onboarding and permission setup
+Test reports (unit tests, integration tests, device compatibility)
+ Support & Maintenance: 
+Code should be modular and well-documented for future updates
+Include analytics SDK (Firebase or Mixpanel) to track feature usage
+Set up crash reporting (Firebase Crashlytics)
+Plan for quarterly Android OS updates and compatibility testing
+  This document provides comprehensive specifications for developing FocusGuard. If any requirements are unclear or need further elaboration, please request clarification before starting development. Good luck building this productivity-enhancing app!

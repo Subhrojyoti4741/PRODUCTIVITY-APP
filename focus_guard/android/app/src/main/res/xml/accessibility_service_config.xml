@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/accessibility_service_description"
+    android:packageNames="com.facebook.katana,com.instagram.android,com.twitter.android,com.zhiliaoapp.musically" 
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFlags="flagDefault"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:notificationTimeout="100"
+    android:canRetrieveWindowContent="true"
+    />
+<!-- Note: packageNames can be null to listen to all. I will set it to null in code or omit here to listen to all and filter in code. -->
+<!-- Actually, omitting packageNames monitors all strings. -->

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Productivity Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#06f9d0",
+                        "background-light": "#f5f8f8",
+                        "background-dark": "#0f231f",
+                        "accent-purple": "#a855f7",
+                        "accent-coral": "#ff6b6b",
+                        "badge-gold": "#FFD700",
+                    },
+                    fontFamily: {
+                        "display": ["Spline Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .badge-pop-up {
+            animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%) translateX(-50%); opacity: 0; }
+            to { transform: translateY(0) translateX(-50%); opacity: 1; }
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#0d1c1a] dark:text-white min-h-screen">
+<div class="max-w-[430px] mx-auto min-h-screen flex flex-col relative overflow-hidden">
+<div class="fixed bottom-28 left-1/2 -translate-x-1/2 z-[60] w-[90%] max-w-[380px] bg-white dark:bg-[#1a332f] rounded-2xl shadow-2xl border-2 border-primary/30 p-4 flex items-center gap-4 badge-pop-up">
+<div class="size-14 rounded-full bg-gradient-to-br from-badge-gold to-yellow-600 flex items-center justify-center shadow-lg shadow-badge-gold/20">
+<span class="material-symbols-outlined text-white text-3xl" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<div class="flex-1">
+<p class="text-[10px] font-bold text-primary uppercase tracking-widest">Badge Unlocked!</p>
+<h4 class="text-lg font-bold leading-tight">Productivity Champ</h4>
+<p class="text-xs opacity-70">You finished all your morning goals!</p>
+</div>
+<button class="size-8 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+<header class="flex items-center p-6 pb-2 justify-between">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border-2 border-primary">
+<div class="w-full h-full bg-cover bg-center" data-alt="User avatar with colorful abstract background" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDOkJ-Cuuqod-6Ns5ecIL2kLJaSaMPSZa-MSCnVurXq3quh6MEmDIiELPOqkR-deQ6VdI90R4TA1TL1fA_D8VA8CMm12B15z6AQpPswtGM1qhXvpZ0ZipqshAmvJAG9gnJbTRjq4rV5JniBIihPyPPhr7Rhn04woziCxZGt2sw--rPzrQ2UduzCFPW3qFBUM60pM9uXlrycE507IFxBLHXoRkLecM6OwBOX9JodLB3oHnJhVhRukWsxvfyAaP7-442R9mX2K8CHY9Y");'></div>
+</div>
+<div>
+<h2 class="text-[#0d1c1a] dark:text-white text-lg font-bold leading-tight tracking-tight">Hi, Alex! 👋</h2>
+<div class="flex items-center gap-2">
+<p class="text-xs text-[#479e90] dark:text-primary/70 font-medium">Level 12 • Productive Pro</p>
+<button class="flex items-center gap-0.5 bg-badge-gold/10 px-1.5 py-0.5 rounded-full border border-badge-gold/20">
+<span class="material-symbols-outlined text-[14px] text-yellow-600 dark:text-badge-gold" style="font-variation-settings: 'FILL' 1;">military_tech</span>
+<span class="text-[10px] font-bold text-yellow-700 dark:text-badge-gold">8</span>
+</button>
+</div>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex size-10 items-center justify-center rounded-xl bg-white dark:bg-white/10 shadow-sm">
+<span class="material-symbols-outlined text-[#0d1c1a] dark:text-white">notifications</span>
+</button>
+<button class="flex size-10 items-center justify-center rounded-xl bg-white dark:bg-white/10 shadow-sm">
+<span class="material-symbols-outlined text-[#0d1c1a] dark:text-white">settings</span>
+</button>
+</div>
+</header>
+<main class="flex-1 px-4 pb-24">
+<section class="mt-4 p-6 bg-white dark:bg-white/5 rounded-xl shadow-sm border border-black/5 dark:border-white/5 relative overflow-hidden">
+<div class="absolute -right-4 -top-4 size-24 bg-primary/10 rounded-full blur-2xl"></div>
+<div class="flex flex-col items-center justify-center relative">
+<div class="relative flex items-center justify-center">
+<svg class="size-40">
+<circle class="text-gray-100 dark:text-gray-800" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary progress-ring-circle" cx="80" cy="80" fill="transparent" r="70" stroke="currentColor" stroke-dasharray="440" stroke-dashoffset="110" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-3xl font-bold">6/8</span>
+<span class="text-[10px] uppercase tracking-widest font-bold opacity-60">Tasks Done</span>
+</div>
+<div class="absolute -left-6 bottom-0 size-16 drop-shadow-lg" data-alt="Cute green monster mascot cheering" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBKafgz5QkkJ8WF6N_oIPGP4NIvOM8tQzcgYWTXyu5vDxafc3aQEB2eAwBoaGzmzVeGyG0jP11Uy4xHwu9L139xD3ib4ldcu9wX1S46PYyNDgULcaprOm0SCKt-Nv0IP45y7U3ZKlg8VxfO0-UkG79xWLY0cWTTSE7tMr3isT4ly6hzP2cS_S7l81udDUtsDG0KtmSj6LE6tsmA1L8Lb36WNY2TV6IA5hmXMvj_-m4bjT63i1cTi_WGIc_B9Lgxrtogr8obSzkIoq8"); background-size: contain; background-repeat: no-repeat;'></div>
+</div>
+<div class="mt-4 text-center">
+<p class="text-sm font-medium text-[#479e90] dark:text-primary">You're on fire! 🔥 +250 XP earned today</p>
+</div>
+</div>
+</section>
+<section class="mt-6">
+<div class="flex items-center justify-between px-1 mb-3">
+<h3 class="text-lg font-bold">Focus Zone</h3>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-accent-purple/10 p-4 rounded-xl border border-accent-purple/20 flex flex-col gap-2 relative">
+<span class="material-symbols-outlined text-accent-purple">play_circle</span>
+<p class="font-bold text-sm">Study Beats</p>
+<p class="text-[10px] opacity-70">YouTube Lofi Integration</p>
+</div>
+<div class="bg-accent-coral/10 p-4 rounded-xl border border-accent-coral/20 flex flex-col gap-2 relative">
+<span class="material-symbols-outlined text-accent-coral">timer</span>
+<p class="font-bold text-sm">Pomodoro</p>
+<p class="text-[10px] opacity-70">25m deep work session</p>
+</div>
+</div>
+</section>
+<section class="mt-8">
+<div class="flex items-center justify-between px-1 mb-1">
+<h3 class="text-lg font-bold">Daily Tasks</h3>
+<span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">75% Complete</span>
+</div>
+<div class="space-y-2" style="--checkbox-tick-svg: url('data:image/svg+xml,%3csvg viewBox=%270 0 16 16%27 fill=%27rgb(13,28,26)%27 xmlns=%27http://www.w3.org/2000/svg%27%3e%3cpath d=%27M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z%27/%3e%3c/svg%3e');">
+<label class="flex items-center gap-4 p-4 bg-white dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5 shadow-sm">
+<input checked="" class="h-6 w-6 rounded-lg border-2 border-primary/30 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all" type="checkbox"/>
+<div class="flex-1">
+<p class="text-base font-semibold leading-none text-gray-400 line-through">Deep Work - 2h</p>
+<p class="text-[10px] text-gray-400 mt-1">Productivity • Completed 9:00 AM</p>
+</div>
+</label>
+<label class="flex items-center gap-4 p-4 bg-white dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5 shadow-sm">
+<input class="h-6 w-6 rounded-lg border-2 border-primary/30 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all" type="checkbox"/>
+<div class="flex-1">
+<p class="text-base font-semibold leading-none">Math Study Session</p>
+<p class="text-[10px] text-[#479e90] mt-1">Education • Due 2:00 PM</p>
+</div>
+<span class="px-2 py-1 rounded-lg bg-accent-purple/10 text-accent-purple text-[10px] font-bold">+50 XP</span>
+</label>
+<label class="flex items-center gap-4 p-4 bg-white dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5 shadow-sm">
+<input class="h-6 w-6 rounded-lg border-2 border-primary/30 bg-transparent text-primary checked:bg-primary checked:border-primary checked:bg-[image:--checkbox-tick-svg] focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all" type="checkbox"/>
+<div class="flex-1">
+<p class="text-base font-semibold leading-none">Journaling &amp; Reflection</p>
+<p class="text-[10px] text-[#479e90] mt-1">Mindfulness • Evening</p>
+</div>
+<span class="px-2 py-1 rounded-lg bg-accent-coral/10 text-accent-coral text-[10px] font-bold">+20 XP</span>
+</label>
+</div>
+</section>
+<section class="mt-8">
+<div class="bg-[#0d1c1a] text-white p-6 rounded-2xl shadow-xl relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="text-lg font-bold">Screen Time</h3>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-bold">3h 15m</span>
+<span class="text-xs text-primary">-12% vs yesterday</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary/40">bar_chart</span>
+</div>
+<div class="flex items-end justify-between h-24 gap-2 px-1">
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-white/10 rounded-t-lg h-[60%]"></div>
+<span class="text-[10px] opacity-50">M</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-white/10 rounded-t-lg h-[80%]"></div>
+<span class="text-[10px] opacity-50">T</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-white/10 rounded-t-lg h-[40%]"></div>
+<span class="text-[10px] opacity-50">W</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-primary rounded-t-lg h-[95%]"></div>
+<span class="text-[10px] font-bold text-primary">T</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-white/10 rounded-t-lg h-[50%]"></div>
+<span class="text-[10px] opacity-50">F</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-white/10 rounded-t-lg h-[30%]"></div>
+<span class="text-[10px] opacity-50">S</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2">
+<div class="w-full bg-white/10 rounded-t-lg h-[20%]"></div>
+<span class="text-[10px] opacity-50">S</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-24 right-6">
+<button class="size-14 rounded-full bg-primary shadow-lg shadow-primary/40 flex items-center justify-center border-4 border-white dark:border-background-dark">
+<span class="material-symbols-outlined text-[#0d1c1a] font-bold">add</span>
+</button>
+</div>
+<nav class="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white/80 dark:bg-background-dark/80 backdrop-blur-xl border-t border-black/5 dark:border-white/5 px-6 py-4 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-bold">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#479e90] opacity-50">
+<span class="material-symbols-outlined">leaderboard</span>
+<span class="text-[10px] font-bold">Stats</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#479e90] opacity-50">
+<span class="material-symbols-outlined">self_improvement</span>
+<span class="text-[10px] font-bold">Focus</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-[#479e90] opacity-50">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px] font-bold">Social</span>
+</button>
+</nav>
+</div>
+
+</body></html>
