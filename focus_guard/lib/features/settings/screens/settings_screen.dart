@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../auth/screens/login_screen.dart';
+
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/task_provider.dart';
+import '../../../core/services/native_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -69,31 +69,22 @@ class SettingsScreen extends StatelessWidget {
              _buildSettingTile(context, Icons.dark_mode, "Theme", "Dark Mode"),
              const SizedBox(height: 12),
              _buildSettingTile(context, Icons.info_outline, "Version", "1.0.0 (Beta)"),
+             const SizedBox(height: 12),
+             GestureDetector(
+               onTap: () async {
+                  await NativeService.requestAccessibilityPermission();
+               },
+               child: _buildSettingTile(context, Icons.accessibility_new, "Blocking Access", "Tap to Enable"),
+             ),
+             const SizedBox(height: 12),
+             GestureDetector(
+               onTap: () async {
+                  await NativeService.requestDeviceAdminPermission();
+               },
+               child: _buildSettingTile(context, Icons.security, "Uninstall Protection", "Tap to Enable"),
+             ),
              
              const SizedBox(height: 32),
-             
-             SizedBox(
-               width: double.infinity,
-               child: ElevatedButton.icon(
-                 onPressed: () async {
-                   await Supabase.instance.client.auth.signOut();
-                   if (context.mounted) {
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                        (route) => false
-                      );
-                   }
-                 },
-                 icon: Icon(Icons.logout, color: Colors.white),
-                 label: Text("Log Out", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                 style: ElevatedButton.styleFrom(
-                   backgroundColor: Colors.red.withOpacity(0.8),
-                   padding: EdgeInsets.symmetric(vertical: 16),
-                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                 ),
-               ),
-             ),
-             SizedBox(height: 32),
           ],
         ),
       ),

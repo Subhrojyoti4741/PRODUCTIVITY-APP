@@ -10,9 +10,21 @@ object BlockingManager {
         "com.google.android.inputmethod.latin", // Keyboard
         "com.samsung.android.honeyboard", // Samsung Keyboard
         "com.android.systemui", // System UI
-        "com.android.settings", // Settings (maybe block later, but safe for now)
+        "com.android.settings", // Settings
         "com.google.android.packageinstaller",
-        "com.android.vending" // Play Store
+        "com.android.vending", // Play Store
+        // Essentials for "making it easier to work"
+        "com.android.phone",
+        "com.google.android.dialer",
+        "com.samsung.android.dialer",
+        "com.android.contacts",
+        "com.google.android.contacts",
+        "com.android.calculator2",
+        "com.google.android.calculator",
+        "com.google.android.deskclock",
+        "com.sec.android.app.clockpackage", // Samsung Clock
+        "com.google.android.calendar",
+        "com.samsung.android.calendar"
     )
 
     fun startBlocking(allowed: List<String>) {

@@ -23,21 +23,35 @@ class FocusAccessibilityService : AccessibilityService() {
         Log.d(TAG, "Service Connected")
     }
 
+    private var lastBlockedTime: Long = 0
+    private val BLOCK_COOLDOWN_MS = 1500 // Don't spam block screen
+    
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
 
         if (event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
             val packageName = event.packageName?.toString()
-            Log.d(TAG, "Window Changed: $packageName")
+            
+            // Critical Sanity Checks
+            if (packageName.isNullOrEmpty()) return 
+            if (packageName == this.packageName) return // Never block self (redundant but safe)
 
-            if (packageName != null && BlockingManager.isAppBlocked(packageName)) {
-                Log.d(TAG, "Blocking $packageName")
+            if (BlockingManager.isAppBlocked(packageName)) {
+                val now = System.currentTimeMillis()
+                if (now - lastBlockedTime < BLOCK_COOLDOWN_MS) {
+                    return // Debounce
+                }
+                
+                Log.d(TAG, "Blocking Detected: $packageName")
+                lastBlockedTime = now
+                
                 performGlobalAction(GLOBAL_ACTION_HOME)
                 
                 // Launch Flutter "Blocked" screen
                 val i = Intent(this, MainActivity::class.java)
                 i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 i.action = Intent.ACTION_RUN
+                i.putExtra("BLOCKED_ACTIVITY", true)
                 startActivity(i)
             }
         }

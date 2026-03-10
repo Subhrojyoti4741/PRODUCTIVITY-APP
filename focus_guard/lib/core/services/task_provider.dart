@@ -23,8 +23,56 @@ class TaskProvider with ChangeNotifier {
     _tasks = await _db.getTasks();
     _user = await _db.getUser();
 
+    _syncBlockingState(); // Heal blocking state on load
+
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> _syncBlockingState() async {
+    // Find if there is any active strict task
+    final activeStrictTask = _tasks.firstWhere(
+      (t) => t.isStrict && _isTaskActive(t),
+      orElse: () => Task(
+        title: '', 
+        startTime: DateTime(2000), 
+        endTime: DateTime(2000), 
+        category: '', 
+        allowedApps: [], 
+        xpReward: 0, 
+        isStrict: false
+      )
+    );
+
+    if (activeStrictTask.isStrict && activeStrictTask.title.isNotEmpty) {
+      // Found one -> Ensure blocking is ON
+      await NativeService.startBlocking(activeStrictTask.allowedApps);
+    } else {
+      // None found -> Ensure blocking is OFF
+      await NativeService.stopBlocking();
+    }
+  }
+  
+  Future<void> _checkAndSyncUninstallProtection() async {
+    final now = DateTime.now();
+    final todayTasks = _tasks.where((t) => 
+        t.startTime.year == now.year && 
+        t.startTime.month == now.month && 
+        t.startTime.day == now.day
+    ).toList();
+    
+    if (todayTasks.isEmpty) {
+      // No tasks -> Protection ON? User prompt says "Prevent ... unless all tasks completed".
+      // If no tasks, technically "0/0" is completed? Or "You must create tasks".
+      // Let's assume protection is active until at least one task is done?
+      // "Have all today's tasks been completed?"
+      // If 0 tasks, let's say NO (false). The user MUST work to earn freedom.
+      await NativeService.updateUninstallProtection(false);
+      return;
+    }
+    
+    final allDone = todayTasks.every((t) => t.isCompleted);
+    await NativeService.updateUninstallProtection(allDone);
   }
 
   Future<void> addTask(Task task) async {
@@ -36,6 +84,7 @@ class TaskProvider with ChangeNotifier {
     }
     
     await loadData();
+    await _checkAndSyncUninstallProtection();
   }
 
   Future<void> completeTask(Task task) async {
@@ -69,6 +118,7 @@ class TaskProvider with ChangeNotifier {
     }
 
     await loadData();
+    await _checkAndSyncUninstallProtection();
   }
 
   Future<void> deleteTask(int id) async {

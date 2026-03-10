@@ -3,9 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/services/task_provider.dart';
+import '../../../core/services/supabase_service.dart';
 import '../../../core/models/task_model.dart';
 import '../../../core/models/user_model.dart';
 import '../../tasks/screens/create_task_screen.dart';
+import '../../planning/screens/daily_planning_screen.dart';
+import '../../planning/services/daily_planning_service.dart';
 import '../../learning/screens/learning_screen.dart';
 import '../../focus/screens/pomodoro_screen.dart';
 import '../../settings/screens/settings_screen.dart';
@@ -21,7 +24,15 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() => context.read<TaskProvider>().loadData());
+    Future.microtask(() async {
+      context.read<TaskProvider>().loadData();
+      await SupabaseService().ensureProfileExists();
+      
+      final needsPlanning = await DailyPlanningService().checkAndEnforceLockdown();
+      if (needsPlanning && mounted) {
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => DailyPlanningScreen()));
+      }
+    });
   }
 
   int _selectedIndex = 0;

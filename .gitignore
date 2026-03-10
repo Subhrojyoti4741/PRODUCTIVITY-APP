@@ -1,0 +1,17 @@
+# Ignore Mac apps/installers
+*.dmg
+
+# Ignore archives
+*.zip
+*.tar.gz
+
+# Ignore system files
+.DS_Store
+
+# Ignore Flutter build files (Since the flutter project is in a subdirectory)
+focus_guard/build/
+focus_guard/.dart_tool/
+focus_guard/.pub/
+focus_guard/.flutter-plugins
+focus_guard/.flutter-plugins-dependencies
+focus_guard/.packages

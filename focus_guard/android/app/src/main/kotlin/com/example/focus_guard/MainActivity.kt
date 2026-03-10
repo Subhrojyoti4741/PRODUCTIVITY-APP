@@ -15,7 +15,9 @@ class MainActivity: FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+        
+        val methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+        methodChannel.setMethodCallHandler { call, result ->
             if (call.method == "checkAccessibilityPermission") {
                 result.success(isAccessibilityServiceEnabled(context, FocusAccessibilityService::class.java))
             } else if (call.method == "requestAccessibilityPermission") {
@@ -27,16 +29,107 @@ class MainActivity: FlutterActivity() {
                 result.success(apps)
             } else if (call.method == "startBlocking") {
                 val allowedApps = call.argument<List<String>>("allowedApps") ?: listOf()
-                // Also add self to allowed
-                val fullList = allowedApps + context.packageName
+                
+                // 1. Add Self
+                val myPackage = context.packageName
+                
+                // 2. Add Default Launcher (Home Screen)
+                val launcherIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+                val resolveInfo = context.packageManager.resolveActivity(launcherIntent, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY)
+                val launcherPackage = resolveInfo?.activityInfo?.packageName
+                
+                // Combine all
+                val fullList = allowedApps.toMutableList()
+                if (myPackage != null) fullList.add(myPackage)
+                if (launcherPackage != null) fullList.add(launcherPackage)
+                
                 BlockingManager.startBlocking(fullList)
                 result.success(true)
             } else if (call.method == "stopBlocking") {
                 BlockingManager.stopBlocking()
                 result.success(true)
+            } else if (call.method == "requestDeviceAdmin") {
+                try {
+                     android.util.Log.e("FocusGuard", "Simple Check: Requesting Admin")
+                     
+                     val dpm = context.getSystemService(Context.DEVICE_POLICY_SERVICE) as android.app.admin.DevicePolicyManager
+                     val componentName = android.content.ComponentName(context, GuardAdminReceiver::class.java)
+                     
+                     if (dpm.isAdminActive(componentName)) {
+                         android.util.Log.e("FocusGuard", "State: Already Active")
+                         android.widget.Toast.makeText(context, "Uninstall Protection is Already Active ✅", android.widget.Toast.LENGTH_SHORT).show()
+                     } else {
+                         android.util.Log.e("FocusGuard", "State: Not Active, Redirecting to Settings")
+                         
+                         // Bypass the broken system dialog and go straight to the list
+                         android.widget.Toast.makeText(context, "Redirecting to Settings. Please Activate Manually.", android.widget.Toast.LENGTH_LONG).show()
+                         
+                         try {
+                             // Try opening the specific "Device Admin Apps" list directly
+                             val intent = Intent()
+                             intent.setComponent(android.content.ComponentName("com.android.settings", "com.android.settings.DeviceAdminSettings"))
+                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                             context.startActivity(intent)
+                         } catch (e: Exception) {
+                             // Fallback to Security Settings
+                             try {
+                                 val intent = Intent(Settings.ACTION_SECURITY_SETTINGS)
+                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                 context.startActivity(intent)
+                             } catch (e2: Exception) {
+                                 val intent = Intent(Settings.ACTION_SETTINGS)
+                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                 context.startActivity(intent)
+                             }
+                         }
+                     }
+                     
+                     result.success(true)
+                } catch (e: Exception) {
+                     android.util.Log.e("FocusGuard", "EXCEPTION: ${e.message}")
+                     e.printStackTrace()
+                     android.widget.Toast.makeText(context, "Err: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+                     result.error("ADMIN_ERROR", e.message, null)
+                }
+            } else if (call.method == "updateUninstallProtection") {
+                val allCompleted = call.argument<Boolean>("allCompleted") ?: false
+                val prefs = context.getSharedPreferences("FocusGuardPrefs", Context.MODE_PRIVATE)
+                val editor = prefs.edit()
+                
+                editor.putBoolean("all_tasks_completed", allCompleted)
+                
+                if (allCompleted) {
+                    // Set allowed uninstall time to Midnight Tonight (i.e., start of tomorrow)
+                    val c = java.util.Calendar.getInstance()
+                    c.add(java.util.Calendar.DAY_OF_YEAR, 1)
+                    c.set(java.util.Calendar.HOUR_OF_DAY, 0)
+                    c.set(java.util.Calendar.MINUTE, 0)
+                    c.set(java.util.Calendar.SECOND, 0)
+                    editor.putLong("earliest_uninstall_time", c.timeInMillis)
+                } else {
+                    editor.putLong("earliest_uninstall_time", Long.MAX_VALUE) // Never effectively
+                }
+                
+                editor.apply()
+                result.success(true)
             } else {
                 result.notImplemented()
             }
+        }
+
+        // Check initial intent
+        handleIntent(intent, methodChannel)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val methodChannel = MethodChannel(flutterEngine!!.dartExecutor.binaryMessenger, CHANNEL)
+        handleIntent(intent, methodChannel)
+    }
+
+    private fun handleIntent(intent: Intent, channel: MethodChannel) {
+        if (intent.getBooleanExtra("BLOCKED_ACTIVITY", false)) {
+            channel.invokeMethod("showBlockedScreen", null)
         }
     }
 

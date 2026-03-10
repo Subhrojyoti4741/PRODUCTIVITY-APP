@@ -25,6 +25,21 @@ class SupabaseService {
       await createProfile(res.user!.id, username);
     }
   }
+
+  Future<void> ensureProfileExists() async {
+    final user = currentUser;
+    if (user == null) return;
+    
+    try {
+      final data = await client.from('profiles').select().eq('id', user.id).maybeSingle();
+      if (data == null) {
+        // Create missing profile
+        await createProfile(user.id, user.userMetadata?['username'] ?? 'User');
+      }
+    } catch (_) {
+      // Ignore errors
+    }
+  }
   
   Future<void> createProfile(String userId, String username) async {
     await client.from('profiles').insert({

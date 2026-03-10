@@ -31,7 +31,7 @@ class _SignupScreenState extends State<SignupScreen> {
     } on AuthException catch (error) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error.message, style: TextStyle(color: Colors.white)), backgroundColor: Colors.red));
     } catch (error) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Unexpected error occurred', style: TextStyle(color: Colors.white)), backgroundColor: Colors.red));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $error', style: TextStyle(color: Colors.white)), backgroundColor: Colors.red));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
